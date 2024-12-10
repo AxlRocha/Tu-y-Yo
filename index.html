@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nossos Gastos 🎀</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #ffe6ea 0%, #ffeaf4 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            color: #815b67;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            box-shadow: 0 8px 32px rgba(255, 182, 193, 0.2);
+            padding: 20px;
+            border: 3px solid #ffd1dc;
+        }
+
+        .header {
+            text-align: center;
+            background: linear-gradient(135deg, #ffebf3 0%, #fff5f7 100%);
+            border-radius: 20px;
+            padding: 15px;
+            margin-bottom: 30px;
+            border: 2px dashed #ffc0cb;
+            position: relative;
+        }
+
+        .header::before, .header::after {
+            content: '🌸';
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 2em;
+        }
+
+        .header::before { left: 20px; }
+        .header::after { right: 20px; }
+
+        .header h1 {
+            margin: 0;
+            padding: 10px;
+            font-size: 2.2em;
+            color: #ff69b4;
+            text-shadow: 2px 2px 4px rgba(255, 105, 180, 0.2);
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-container {
+            background: linear-gradient(135deg, #fff8f9 0%, #fff 100%);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(255, 182, 193, 0.15);
+            border: 2px solid #ffe1e7;
+        }
+
+        .expenses-list {
+            background: linear-gradient(135deg, #fff8f9 0%, #fff 100%);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(255, 182, 193, 0.15);
+            border: 2px solid #ffe1e7;
+        }
+
+        .expense-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #fff8fa 0%, #fff 100%);
+            border: 2px solid #ffeaf1;
+            transition: all 0.3s ease;
+        }
+
+        .expense-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 182, 193, 0.2);
+        }
+
+        .expense-icon {
+            font-size: 1.5em;
+            margin-right: 10px;
+        }
+
+        .expense-name {
+            display: flex;
+            align-items: center;
+            font-size: 1.1em;
+            color: #ff69b4;
+        }
+
+        .expense-value {
+            font-weight: bold;
+            color: #ff69b4;
+            background: linear-gradient(135deg, #ffe6f2 0%, #fff 100%);
+            padding: 8px 15px;
+            border-radius: 12px;
+            border: 2px solid #ffd1dc;
+        }
+
+        .total {
+            margin-top: 25px;
+            padding: 20px;
+            border-top: 3px dotted #ffd1dc;
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #ff69b4;
+            background: linear-gradient(135deg, #fff0f5 0%, #fff 100%);
+            border-radius: 15px;
+            align-items: center;
+        }
+
+        .total-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .kawaii-decoration {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            font-size: 3em;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .sparkle {
+            display: inline-block;
+            animation: sparkle 1.5s ease-in-out infinite;
+        }
+
+        @keyframes sparkle {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✨ Nossos Gastos ❤️</h1>
+        </div>
+        
+        <div class="content">
+            <div class="chart-container">
+                <canvas id="expensesChart"></canvas>
+            </div>
+            
+            <div class="expenses-list">
+                <div id="expenseItems"></div>
+                <div class="total">
+                    <span class="total-label">
+                        <span class="sparkle">💖</span> Total do Mês
+                    </span>
+                    <span id="totalAmount"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="kawaii-decoration">🌈</div>
+
+    <script>
+        const expenses = [
+            { name: 'Cartão de Crédito', value: 1200, color: '#FFB7C5', icon: '💳' },
+            { name: 'Besteira', value: 500, color: '#FFD1DC', icon: '🍬' },
+            { name: 'Queijo', value: 500, color: '#FFF0F5', icon: '🧀' },
+            { name: 'Faculdade', value: 400, color: '#FFE4E1', icon: '📚' },
+            { name: 'Comida', value: 200, color: '#FFE7E7', icon: '🍱' },
+            { name: 'A-tal-coisa', value: 200, color: '#FFDAB9', icon: '✨' },
+            { name: 'Investimento', value: 100, color: '#FFE4E1', icon: '💎' },
+            { name: 'Batata-frita', value: 100, color: '#FFEFD5', icon: '🍟' },
+            { name: 'Roupa', value: 90, color: '#FFE4E1', icon: '👗' }
+        ];
+
+        // Criar o gráfico
+        const ctx = document.getElementById('expensesChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: expenses.map(exp => exp.name),
+                datasets: [{
+                    data: expenses.map(exp => exp.value),
+                    backgroundColor: expenses.map(exp => exp.color),
+                    borderColor: 'white',
+                    borderWidth: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: {
+                                family: 'Nunito',
+                                size: 12
+                            },
+                            color: '#815b67'
+                        }
+                    }
+                },
+                cutout: '60%'
+            }
+        });
+
+        // Criar lista de despesas
+        const expenseItems = document.getElementById('expenseItems');
+        expenses.forEach(expense => {
+            const item = document.createElement('div');
+            item.className = 'expense-item';
+            item.innerHTML = `
+                <span class="expense-name">
+                    <span class="expense-icon">${expense.icon}</span>
+                    ${expense.name}
+                </span>
+                <span class="expense-value">R$ ${expense.value.toLocaleString('pt-BR')}</span>
+            `;
+            expenseItems.appendChild(item);
+        });
+
+        // Calcular e mostrar total
+        const total = expenses.reduce((sum, exp) => sum + exp.value, 0);
+        document.getElementById('totalAmount').textContent = 
+            `R$ ${total.toLocaleString('pt-BR')}`;
+    </script>
+</body>
+</html>
