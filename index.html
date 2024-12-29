@@ -263,18 +263,17 @@
     <script>
         const expenses = [
             { 
-                name: 'Quem casa quer casa', 
-                value: 100, 
+                name: 'Investimentos', 
+                value: 200, 
                 color: '#FFB7C5', 
-                icon: '🏠',
-                details: null
-            },
-            { 
-                name: 'Investimentos Geral', 
-                value: 100, 
-                color: '#FFD1DC', 
-                icon: '💎',
-                details: null
+                icon: '💰',
+                details: {
+                    local: 'Carteira Total de Investimentos',
+                    itens: [
+                        'Quem casa quer casa: R$ 100',
+                        'Investimentos Geral: R$ 100'
+                    ]
+                }
             },
             { 
                 name: 'Comida', 
