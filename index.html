@@ -7,6 +7,67 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap');
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: relative;
+            background: white;
+            margin: 15% auto;
+            padding: 20px;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 20px;
+            border: 3px solid #ffd1dc;
+            background: linear-gradient(135deg, #fff8f9 0%, #fff 100%);
+        }
+
+        .modal-header {
+            color: #ff69b4;
+            border-bottom: 2px dashed #ffd1dc;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-details {
+            color: #815b67;
+            font-size: 1.1em;
+        }
+
+        .modal-details ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .modal-details li {
+            padding: 8px 0;
+            border-bottom: 1px solid #ffe1e7;
+        }
+
+        .close-modal {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #ff69b4;
+        }
+
+        .expense-item {
+            cursor: pointer;
+        }
 
         body {
             font-family: 'Nunito', sans-serif;
@@ -192,17 +253,43 @@
 
     <div class="kawaii-decoration">🌈</div>
 
+    <div id="expenseModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">×</span>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
     <script>
         const expenses = [
-            { name: 'Cartão de Crédito', value: 1200, color: '#FFB7C5', icon: '💳' },
-            { name: 'Besteira', value: 500, color: '#FFD1DC', icon: '🍬' },
-            { name: 'Queijo', value: 500, color: '#FFF0F5', icon: '🧀' },
-            { name: 'Faculdade', value: 400, color: '#FFE4E1', icon: '📚' },
-            { name: 'Comida', value: 200, color: '#FFE7E7', icon: '🍱' },
-            { name: 'A-tal-coisa', value: 200, color: '#FFDAB9', icon: '✨' },
-            { name: 'Investimento', value: 100, color: '#FFE4E1', icon: '💎' },
-            { name: 'Batata-frita', value: 100, color: '#FFEFD5', icon: '🍟' },
-            { name: 'Roupa', value: 90, color: '#FFE4E1', icon: '👗' }
+            { 
+                name: 'Quem casa quer casa', 
+                value: 100, 
+                color: '#FFB7C5', 
+                icon: '🏠',
+                details: null
+            },
+            { 
+                name: 'Investimentos Geral', 
+                value: 100, 
+                color: '#FFD1DC', 
+                icon: '💎',
+                details: null
+            },
+            { 
+                name: 'Comida', 
+                value: 74, 
+                color: '#FFF0F5', 
+                icon: '🍽️',
+                details: {
+                    local: 'Vovó Virgínia',
+                    itens: [
+                        '2 bolos',
+                        '1 coxinha',
+                        '1 capuccino'
+                    ]
+                }
+            }
         ];
 
         // Criar o gráfico
@@ -249,6 +336,43 @@
                 <span class="expense-value">R$ ${expense.value.toLocaleString('pt-BR')}</span>
             `;
             expenseItems.appendChild(item);
+
+            // Adicionar evento de clique para mostrar detalhes
+            if (expense.details) {
+                item.addEventListener('click', () => {
+                    const modal = document.getElementById('expenseModal');
+                    const modalContent = document.getElementById('modalContent');
+                    
+                    modalContent.innerHTML = `
+                        <div class="modal-header">
+                            <span class="expense-icon">${expense.icon}</span>
+                            <h2>${expense.name}</h2>
+                        </div>
+                        <div class="modal-details">
+                            <p><strong>Local:</strong> ${expense.details.local}</p>
+                            <p><strong>Valor:</strong> R$ ${expense.value.toLocaleString('pt-BR')}</p>
+                            <p><strong>Itens:</strong></p>
+                            <ul>
+                                ${expense.details.itens.map(item => `<li>${item}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `;
+                    
+                    modal.style.display = 'block';
+                });
+            }
+        });
+
+        // Configurar fechamento do modal
+        document.querySelector('.close-modal').addEventListener('click', () => {
+            document.getElementById('expenseModal').style.display = 'none';
+        });
+
+        window.addEventListener('click', (event) => {
+            const modal = document.getElementById('expenseModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
         });
 
         // Calcular e mostrar total
